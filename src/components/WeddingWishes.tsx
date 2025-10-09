@@ -65,6 +65,33 @@ const WeddingWishes = () => {
     }
   }, []);
 
+  useEffect(() => {
+    // Set up intersection observer for scroll animations
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = paragraphRefs.current.indexOf(entry.target as HTMLParagraphElement);
+            if (index !== -1) {
+              setVisibleParagraphs((prev) => new Set(prev).add(index));
+            }
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    paragraphRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => {
+      paragraphRefs.current.forEach((ref) => {
+        if (ref) observer.unobserve(ref);
+      });
+    };
+  }, [isAuthenticated]);
+
   const arabicText = `خلود حبيبتي، كل لحظة معك الآن هي كنز أحتفظ فيه بقلبي، لأني أعرف قيمة الوقت اللي عندنا.
 
 أحبك اليوم أكثر من أمس، وأعيش كل يوم معك كأنه هدية ثمينة ما أبي أضيعها. وجودك بحياتي الآن هو أجمل شي حاصل لي.
@@ -125,9 +152,9 @@ const WeddingWishes = () => {
   }
 
   return (
-    <div className="celebration-bg relative flex items-center justify-center p-2 sm:p-4">
+    <div className="celebration-bg relative min-h-screen overflow-y-auto">
       {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {/* Floating hearts */}
         <div className="absolute top-10 sm:top-20 left-5 sm:left-10 text-3xl sm:text-6xl text-rose-gold/30 float-animation">💖</div>
         <div className="absolute top-20 sm:top-32 right-5 sm:right-20 text-2xl sm:text-4xl text-blush-pink/40 float-animation" style={{ animationDelay: '1s' }}>🌸</div>
@@ -143,32 +170,35 @@ const WeddingWishes = () => {
       </div>
 
       {/* Main content card */}
-      <div className="wedding-card max-w-4xl w-full relative z-10 animate-in fade-in-0 zoom-in-95 duration-1000 mx-2">
-        <div className="text-center mb-4 sm:mb-8">
-          <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold glow-text text-primary mb-2 sm:mb-4 float-animation">
+      <div className="wedding-card max-w-6xl w-full relative z-10 mx-auto px-4 sm:px-8 py-8 sm:py-12">
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold glow-text text-primary mb-4 sm:mb-6 float-animation">
             🌹 حبيبتي خلود 🌹
           </h1>
-          <div className="w-32 h-1 bg-gradient-to-r from-rose-gold to-primary mx-auto rounded-full"></div>
+          <div className="w-32 sm:w-48 h-1 bg-gradient-to-r from-rose-gold to-primary mx-auto rounded-full"></div>
         </div>
 
-        <div className="arabic-text text-center space-y-3 sm:space-y-6 text-base sm:text-lg md:text-xl leading-relaxed text-foreground/90">
+        <div className="arabic-text text-center space-y-6 sm:space-y-8 md:space-y-10 text-lg sm:text-xl md:text-2xl lg:text-3xl leading-relaxed text-foreground/90 max-w-5xl mx-auto">
           {arabicText.split('\n\n').map((paragraph, index) => (
             <p
               key={index}
-              className={`animate-in slide-in-from-bottom-4 fade-in-0 duration-1000 ${paragraph.includes('❤️') ? 'text-lg sm:text-xl md:text-2xl font-semibold text-primary glow-text' : ''
-                }`}
-              style={{ animationDelay: `${(index + 1) * 300}ms` }}
+              ref={(el) => (paragraphRefs.current[index] = el)}
+              className={`transition-all duration-1000 transform ${
+                visibleParagraphs.has(index)
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-8'
+              } ${paragraph.includes('🌹') ? 'text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-primary glow-text' : ''}`}
             >
               {paragraph}
             </p>
           ))}
         </div>
 
-        {/* Decorative bottom */}
-        <div className="flex justify-center items-center mt-6 sm:mt-12 space-x-4 rtl:space-x-reverse">
-          <div className="w-12 sm:w-16 h-0.5 bg-gradient-to-r from-transparent to-rose-gold"></div>
-          <div className="text-2xl sm:text-4xl text-primary animate-pulse">💕</div>
-          <div className="w-12 sm:w-16 h-0.5 bg-gradient-to-l from-transparent to-rose-gold"></div>
+        {/* Decorative bottom with more spacing */}
+        <div className="flex justify-center items-center mt-12 sm:mt-16 space-x-4 rtl:space-x-reverse mb-8">
+          <div className="w-16 sm:w-24 h-0.5 bg-gradient-to-r from-transparent to-rose-gold"></div>
+          <div className="text-3xl sm:text-5xl text-primary animate-pulse">💕</div>
+          <div className="w-16 sm:w-24 h-0.5 bg-gradient-to-l from-transparent to-rose-gold"></div>
         </div>
       </div>
 
