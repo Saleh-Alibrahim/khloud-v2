@@ -43,7 +43,7 @@ const WeddingWishes = () => {
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.toLowerCase() === 'saleh' || password === 'صالح') {
+    if (password.toLowerCase() === 'saleh2' || password === 'صالح2') {
       setIsAuthenticated(true);
       setPasswordError(false);
     } else {
@@ -72,13 +72,16 @@ const WeddingWishes = () => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const index = paragraphRefs.current.indexOf(entry.target as HTMLParagraphElement);
-            if (index !== -1) {
-              setVisibleParagraphs((prev) => new Set(prev).add(index));
+            if (index !== -1 && !visibleParagraphs.has(index)) {
+              // Staggered delay - each line appears 2 seconds after the previous one
+              setTimeout(() => {
+                setVisibleParagraphs((prev) => new Set(prev).add(index));
+              }, index * 2000);
             }
           }
         });
       },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+      { threshold: 0.05, rootMargin: '0px 0px -50px 0px' }
     );
 
     paragraphRefs.current.forEach((ref) => {
@@ -90,7 +93,7 @@ const WeddingWishes = () => {
         if (ref) observer.unobserve(ref);
       });
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, visibleParagraphs]);
 
   const arabicText = `خلود حبيبتي، كل لحظة معك الآن هي كنز أحتفظ فيه بقلبي، لأني أعرف قيمة الوقت اللي عندنا.
 
@@ -183,10 +186,10 @@ const WeddingWishes = () => {
             <p
               key={index}
               ref={(el) => (paragraphRefs.current[index] = el)}
-              className={`transition-all duration-1000 transform ${
+              className={`transition-all duration-[2500ms] ease-in-out transform ${
                 visibleParagraphs.has(index)
-                  ? 'opacity-100 translate-y-0'
-                  : 'opacity-0 translate-y-8'
+                  ? 'opacity-100 translate-y-0 scale-100'
+                  : 'opacity-0 translate-y-16 scale-90'
               } ${paragraph.includes('🌹') ? 'text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-primary glow-text' : ''}`}
             >
               {paragraph}
